@@ -31,3 +31,4 @@ Thumbs.db
 
 # node_modules already in repo but ignore sub-nodemodules
 node_modules/.package-lock.json
+sessions/
