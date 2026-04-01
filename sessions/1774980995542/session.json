@@ -1,0 +1,113 @@
+{
+  "url": "6.12 AgO:/ n@d.aN 01/26 快来看这是抓住了个啥？# 搞笑视频 # 万万想不到 # 反转剧情 # 看到最后 # 看一遍笑一遍  https://v.douyin.com/1twLJ5JJ-x8/ 复制此链接，打开Dou音搜索，直接观看视频！",
+  "extract": {
+    "raw_transcript": "普通人如何从零开始学古筝？关注我就可以。",
+    "video_title": "快来看这是抓住了个啥？#搞笑视频 #万万想不到 #反转剧情 #看到最后 #看一遍笑一遍",
+    "author": "爱姐0311",
+    "status": "done"
+  },
+  "rewrite": {
+    "rewritten": "零基础想学古筝\n根本不知道从哪下手？\n别慌跟我来就对了",
+    "status": "done"
+  },
+  "title": {
+    "title": "零基础学古筝？这一条视频全搞定",
+    "hashtags": [
+      "古筝入门",
+      "零基础学古筝",
+      "古筝教学",
+      "乐器学习",
+      "古筝初学者",
+      "国乐传承",
+      "跟我学古筝"
+    ],
+    "status": "done"
+  },
+  "audio": {
+    "audio_path": "D:\\video-factory\\sessions\\1774980995542\\audio.mp3"
+  },
+  "video": {
+    "video_path": "D:\\video-factory\\sessions\\1774980995542\\output.mp4",
+    "video_url": "https://files2.heygen.ai/aws_pacific/avatar_tmp/93e39abe1dbb4234a4b27b4e55c52cd8/a2ce2062482d4ed3a3be05921143098e.mp4?Expires=1775586255&Signature=M-4AaAkQMmTMAOLzhVJXxrQnav1-SXamaMXldR73oy39bC5kcNynPsHu2L3cq6MWouho501Sx5HBSo0~9SIny4HVCNkrJMiV77yUFY95sRQQA0iv9MtWEH5j0IVTL4hfGa~V6NeufYATNNXzV~Hhv8gB6QSv~NYevTReADAHcvsF0Uzx4e3rhAcMqBNig06GUippZ8awXgDcvlricH-PyxcnMjmH0Yi62gkMIK2FNz0gvIoS-8LKA5OYOa7PmzYZSUdGmWnSVq4GkOQYf8A0Oacn7ZlZmI5ZHPf9sHgZUjQbijA3mr6VwF2GfiWXEGpGd9B2oXUaS15d-J~vwNYmqA__&Key-Pair-Id=K38HBHX5LX3X2H",
+    "avatar_id": "323092ab8b83442696180d6c1d599783",
+    "status": "done"
+  },
+  "editConfig": {
+    "bgmPath": "D:\\4月1日.mp3",
+    "subtitleEnable": true,
+    "subColor": "#ffffff",
+    "subStroke": "#000000",
+    "subSize": 24,
+    "subFont": "Microsoft YaHei",
+    "voiceVol": 1,
+    "bgmVol": 0.1,
+    "pip": []
+  },
+  "edit": {
+    "output_path": "D:\\video-factory\\sessions\\1774980995542\\final.mp4",
+    "status": "done"
+  },
+  "subtitle": {
+    "srt_path": "D:\\video-factory\\sessions\\1774980995542\\subtitle.srt",
+    "status": "done"
+  },
+  "cover": {
+    "status": "done",
+    "design": {
+      "mainTitle": "零基础学古筝",
+      "subTitle": "入门指南",
+      "style": "dark",
+      "bgFrame": 1,
+      "mainFont": "Microsoft YaHei",
+      "mainColor": "#ffffff",
+      "mainSize": 162,
+      "mainStroke": "#000000",
+      "subFont": "Microsoft YaHei",
+      "subColor": "#ffd232",
+      "subSize": 100,
+      "subStroke": "#000000"
+    },
+    "douyin": "D:\\video-factory\\sessions\\1774980995542\\cover_douyin.jpg",
+    "xiaohongshu": "D:\\video-factory\\sessions\\1774980995542\\cover_xiaohongshu.jpg",
+    "weixin": "D:\\video-factory\\sessions\\1774980995542\\cover_weixin.jpg",
+    "path": "D:\\video-factory\\sessions\\1774980995542\\cover_douyin.jpg"
+  },
+  "pip": [
+    {
+      "start": "00:00:00,130",
+      "end": "00:00:02,230",
+      "text": "零基础想学古筝根本不",
+      "videoPath": "D:\\3月30日\\3月30日.mp4"
+    },
+    {
+      "start": "00:00:02,230",
+      "end": "00:00:04,470",
+      "text": "知道从哪下手别慌跟着",
+      "videoPath": ""
+    },
+    {
+      "start": "00:00:04,470",
+      "end": "00:00:05,245",
+      "text": "我来就对了",
+      "videoPath": ""
+    }
+  ],
+  "pipSegments": [
+    {
+      "start": "00:00:00,130",
+      "end": "00:00:01,650",
+      "text": "零基础想学古筝"
+    },
+    {
+      "start": "00:00:01,730",
+      "end": "00:00:03,770",
+      "text": "根本不知道从哪下手？"
+    },
+    {
+      "start": "00:00:03,770",
+      "end": "00:00:05,245",
+      "text": "别慌跟我来就对了"
+    }
+  ],
+  "pipGroups": []
+}

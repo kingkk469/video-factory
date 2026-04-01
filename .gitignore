@@ -1,0 +1,33 @@
+# Electron
+dist/
+dist2/
+bundle/
+*.asar
+*.asar.unpacked
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+.env
+
+# Logs
+*.log
+crash.log
+
+# Temp
+tmp/
+_temp/
+*.tmp
+
+# Downloads
+downloads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# node_modules already in repo but ignore sub-nodemodules
+node_modules/.package-lock.json
