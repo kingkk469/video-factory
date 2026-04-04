@@ -106,6 +106,12 @@ body {
   font-size: 12px; font-weight: 600; color: var(--text);
   margin-bottom: 2px;
 }
+.icon-btn-small {
+  margin-left: auto; background: none; border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 6px; font-size: 11px;
+  cursor: pointer; color: var(--text2); transition: background 0.15s;
+}
+.icon-btn-small:hover { background: var(--border); }
 .step-num {
   width: 20px; height: 20px; border-radius: 50%;
   background: var(--green); color: white;
@@ -240,12 +246,34 @@ input[type="range"] {
 /* ── 视频预览 ── */
 .video-preview {
   background: #000; border-radius: 8px; overflow: hidden;
-  aspect-ratio: 9/16; max-height: 280px;
+  aspect-ratio: 9/16; max-height: 480px;
   display: flex; align-items: center; justify-content: center;
-  width: 100%;
+  width: 100%; position: relative;
 }
 .video-preview video { width: 100%; height: 100%; object-fit: contain; }
 .preview-placeholder { color: #666; font-size: 12px; text-align: center; }
+#sub-overlay {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 8%; cursor: grab; user-select: none;
+  white-space: nowrap; text-align: center;
+  pointer-events: auto; z-index: 10;
+  padding: 2px 6px;
+}
+#sub-overlay.dragging { cursor: grabbing; }
+
+#sub-quick-bar {
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(0,0,0,0.55); border-radius: 6px; padding: 4px 8px;
+  z-index: 20;
+}
+#sub-quick-bar select, #sub-quick-bar input[type="number"] {
+  font-size: 11px; background: rgba(255,255,255,0.15); color: #fff;
+  border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; padding: 2px 4px;
+}
+#sub-quick-bar input[type="color"] {
+  width: 24px; height: 22px; border: none; border-radius: 3px; cursor: pointer; padding: 0;
+}
 
 /* ── 生成状态提示 ── */
 .gen-status {
@@ -347,7 +375,12 @@ input[type="range"] {
 .pip-item:hover { background: #E0E0E4; }
 .pip-item-used { opacity: 0.5; }
 .pip-time { color: var(--blue); font-family: "Consolas", monospace; white-space: nowrap; flex-shrink: 0; font-size: 10px; }
+.pip-time-editable { color: var(--blue); font-family: "Consolas", monospace; white-space: nowrap; flex-shrink: 0; font-size: 10px; min-width: 20px; }
+.pip-time-editable[contenteditable="true"]:hover { background: #f0f4ff; border-radius: 3px; cursor: text; }
+.pip-time-editable[contenteditable="true"]:focus { outline: 1px solid var(--blue); border-radius: 3px; background: #fff; padding: 0 2px; }
 .pip-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.pip-text-editable:focus { outline: 1px solid var(--blue); border-radius: 3px; background: #fff; padding: 0 3px; white-space: normal; overflow: visible; }
+.pip-text-editable:not([contenteditable="false"]):hover { background: #f0f4ff; border-radius: 3px; cursor: text; }
 .pip-seg-check { cursor: pointer; accent-color: var(--green); flex-shrink: 0; }
 .pip-used-tag { font-size: 9px; color: var(--green); background: #E0F5EC; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }
 .pip-manual-tag { font-size: 9px; color: #9966FF; background: #F0ECFF; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }
@@ -467,3 +500,18 @@ input[type="range"] {
 .history-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-date { font-size: 11px; color: var(--text2); }
 .history-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* ── 封面设计弹窗 ── */
+.cover-layout-btn {
+  background: var(--bg2); border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 8px 4px; font-size: 12px; font-weight: 500; color: var(--text);
+  cursor: pointer; text-align: center; line-height: 1.4; transition: border-color 0.15s;
+}
+.cover-layout-btn:hover { border-color: var(--blue); }
+.cover-layout-btn.active { border-color: var(--blue); background: rgba(0,113,227,0.12); color: var(--blue); }
+.cover-bg-tab {
+  background: var(--bg2); border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 5px 8px; font-size: 11px; cursor: pointer; color: var(--text2); transition: all 0.15s;
+}
+.cover-bg-tab:hover { border-color: var(--blue); color: var(--text); }
+.cover-bg-tab.active { border-color: var(--blue); background: rgba(0,113,227,0.12); color: var(--blue); font-weight: 600; }

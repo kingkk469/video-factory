@@ -7,10 +7,14 @@ from vf_utils import log, done, error, read_session, update_session, get_env
 
 
 def get_client():
-    return anthropic.Anthropic(
-        base_url=get_env("VF_ANTHROPIC_BASE", "https://api.anthropic.com"),
-        api_key=get_env("VF_ANTHROPIC_KEY"),
-    )
+    base_url = get_env("VF_ANTHROPIC_BASE", "https://api.anthropic.com")
+    kwargs = {
+        "base_url": base_url,
+        "api_key": get_env("VF_ANTHROPIC_KEY"),
+    }
+    if base_url and "anthropic.com" not in base_url:
+        kwargs["default_headers"] = {"User-Agent": "claude-code/1.0"}
+    return anthropic.Anthropic(**kwargs)
 
 
 def run(session_path: str):

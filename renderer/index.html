@@ -46,6 +46,7 @@
       <div class="section">
         <div class="section-label">
           <span class="step-num">2</span> 文案改写
+          <button class="icon-btn-small" id="btn-prompt-edit" title="编辑提示词">✏</button>
         </div>
         <textarea id="rewrite-text" class="text-area" style="min-height:140px" placeholder="改写后的文案..."></textarea>
         <button class="btn-action" id="btn-rewrite">AI 改写</button>
@@ -82,13 +83,6 @@
           <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
           <span id="speed-val">1.0</span>
         </div>
-        <div class="form-row">
-          <label>生成方式</label>
-          <select id="audio-mode" class="select-input">
-            <option value="whole">整段生成（语气更连贯）</option>
-            <option value="sentence">逐句生成</option>
-          </select>
-        </div>
         <div class="form-row file-row" id="audio-file-row" style="display:none">
           <span id="audio-filename" class="file-name">未生成</span>
           <button class="btn-play" id="btn-play-audio">▶</button>
@@ -112,16 +106,11 @@
           <input type="text" id="video-file-path" class="text-input flex1" placeholder="手动选择已有视频文件">
           <button class="btn-small" id="btn-pick-video">选择</button>
         </div>
-        <div class="form-row">
-          <label>牙齿高清</label>
-          <label class="toggle"><input type="checkbox" id="teeth-hd"><span class="slider-track"></span></label>
-          <label style="margin-left:20px">动作随机</label>
-          <label class="toggle"><input type="checkbox" id="motion-random"><span class="slider-track"></span></label>
-        </div>
         <div class="form-row file-row" id="video-file-row" style="display:none">
           <span id="video-filename" class="file-name">未生成</span>
         </div>
         <button class="btn-green" id="btn-video">5. 生成视频</button>
+        <button class="btn-action" id="btn-cancel-video" style="display:none">取消</button>
       </div>
 
       <!-- 字幕 & 剪辑 -->
@@ -129,8 +118,14 @@
         <div class="card-title">✂️ 字幕 & 剪辑</div>
         <div class="form-row">
           <label>背景音乐</label>
-          <input type="text" id="bgm-path" class="text-input flex1" placeholder="（可选）音乐文件路径">
-          <button class="btn-small" id="btn-pick-bgm">选择</button>
+          <select id="bgm-preset" class="select-input flex1">
+            <option value="">— 选择预设 BGM —</option>
+          </select>
+          <button class="btn-small" id="btn-pick-bgm">自定义</button>
+        </div>
+        <div class="form-row" id="bgm-custom-row" style="display:none">
+          <input type="text" id="bgm-path" class="text-input flex1" placeholder="自定义音乐文件路径">
+          <button class="btn-small" id="btn-clear-bgm">✕</button>
         </div>
         <div class="form-row">
           <label>字幕</label>
@@ -152,10 +147,26 @@
           <div class="form-row">
             <label>字体颜色</label>
             <input type="color" id="sub-color" value="#FFFFFF">
-            <label style="margin-left:16px">描边颜色</label>
-            <input type="color" id="sub-stroke" value="#000000">
+            <label style="margin-left:16px">描边</label>
+            <label class="toggle" style="margin-left:4px"><input type="checkbox" id="sub-stroke-enable"><span class="slider-track"></span></label>
+            <input type="color" id="sub-stroke" value="#000000" style="margin-left:6px">
             <label style="margin-left:16px">字号</label>
-            <input type="number" id="sub-size" value="24" min="12" max="60" style="width:50px" class="text-input">
+            <input type="number" id="sub-size" value="20" min="12" max="60" style="width:50px" class="text-input">
+          </div>
+          <div class="form-row">
+            <label>阴影</label>
+            <label class="toggle" style="margin-left:4px"><input type="checkbox" id="sub-shadow-enable" checked><span class="slider-track"></span></label>
+            <input type="color" id="sub-shadow-color" value="#000000" style="margin-left:6px">
+            <label style="margin-left:8px">透明度</label>
+            <input type="range" id="sub-shadow-opacity" min="0" max="100" value="100" style="width:60px">
+            <span id="sub-shadow-opacity-val" style="font-size:11px;color:var(--text2);width:28px">100%</span>
+          </div>
+          <div class="form-row" id="sub-shadow-detail-row">
+            <label>角度</label>
+            <input type="range" id="sub-shadow-angle" min="0" max="360" value="135" style="flex:1">
+            <span id="sub-shadow-angle-val" style="font-size:11px;color:var(--text2);width:28px">135°</span>
+            <label style="margin-left:10px">距离</label>
+            <input type="number" id="sub-shadow-dist" min="0" max="30" value="2" style="width:44px" class="text-input">
           </div>
         </div>
         <div class="form-row">
@@ -168,20 +179,20 @@
         </div>
         <div class="form-row">
           <label style="min-width:40px">BGM</label>
-          <input type="range" id="bgm-vol" min="0" max="1" step="0.05" value="0.3" style="flex:1">
-          <span id="bgm-vol-val" style="width:28px;text-align:right;font-size:11px;color:var(--text2)">30%</span>
+          <input type="range" id="bgm-vol" min="0" max="1" step="0.05" value="0.15" style="flex:1">
+          <span id="bgm-vol-val" style="width:28px;text-align:right;font-size:11px;color:var(--text2)">15%</span>
         </div>
         <div class="form-row file-row" id="srt-file-row" style="display:none">
           <span id="srt-filename" class="file-name">未生成</span>
-          <button class="btn-small" id="btn-gen-subtitle">生成字幕</button>
         </div>
+        <button class="btn-action" id="btn-gen-subtitle" style="width:100%;margin-bottom:6px">5.5 生成字幕</button>
         <button class="btn-green" id="btn-edit">6. 剪辑合成</button>
       </div>
 
       <!-- 画中画 -->
       <div class="card">
         <div class="card-title">🖼 画中画（视频替换）</div>
-        <button class="btn-action" id="pip-pick-selected" style="display:none">为选中段选择视频</button>
+        <button class="btn-action" id="pip-pick-selected" style="display:none">为选中段选择画中画视频或图片</button>
         <div class="pip-hint" id="pip-hint">请先生成字幕，字幕列表将显示在这里</div>
         <div class="pip-list" id="pip-list"></div>
         <button class="btn-green" id="btn-pip-compose" style="display:none">点击合成（全局）</button>
@@ -196,83 +207,20 @@
       <div class="card">
         <div class="video-preview" id="video-preview">
           <div class="preview-placeholder" id="preview-placeholder">视频生成后在此预览</div>
+          <div id="sub-guide" style="position:absolute;left:5%;right:5%;bottom:28%;height:2em;border:1.5px solid rgba(255,60,60,0.75);border-radius:3px;pointer-events:none;z-index:5;"></div>
+          <div id="sub-overlay" style="display:none">示例字幕文字</div>
         </div>
         <div id="gen-status" class="gen-status" style="display:none"></div>
         <button class="btn-small" id="btn-restore-original" style="display:none;margin-top:6px;width:100%">↩ 还原原视频</button>
+        <button class="btn-small" id="btn-open-output-folder" style="display:none;margin-top:6px;width:100%">📂 打开视频文件夹</button>
+        <button class="btn-small" id="btn-toggle-preview-ui" style="margin-top:6px;width:100%">隐藏字幕参考线</button>
       </div>
 
       <!-- 封面 -->
       <div class="card">
         <div class="card-title">封面</div>
-
-        <!-- 主标题 -->
-        <div class="cover-section">
-          <div class="cover-row">
-            <label class="cv-label">主标题</label>
-            <input type="text" id="cover-main-title" class="text-input flex1" placeholder="封面主标题（留空则用视频标题）">
-          </div>
-          <div class="cover-style-row">
-            <label class="cv-label">文字样式</label>
-            <div class="cover-style-controls">
-              <select id="cover-main-font" class="select-input cv-font">
-                <option value="Microsoft YaHei">微软雅黑</option>
-                <option value="SimHei">黑体</option>
-                <option value="KaiTi">楷体</option>
-                <option value="SimSun">宋体</option>
-                <option value="FangSong">仿宋</option>
-                <option value="YouYuan">幼圆</option>
-              </select>
-              <label class="cv-sub-label">颜色</label>
-              <input type="color" id="cover-main-color" class="cv-color" value="#FFFFFF" title="字体颜色">
-              <label class="cv-sub-label">描边</label>
-              <input type="color" id="cover-main-stroke" class="cv-color" value="#000000" title="描边颜色">
-              <label class="cv-sub-label">字号</label>
-              <input type="number" id="cover-main-size" class="cv-size" value="160" min="40" max="280" title="字号">
-            </div>
-          </div>
-        </div>
-
-        <!-- 副标题 -->
-        <div class="cover-section">
-          <div class="cover-row">
-            <label class="cv-label">副标题</label>
-            <input type="text" id="cover-sub-title" class="text-input flex1" placeholder="偏右显示，尾字对齐主标题">
-          </div>
-          <div class="cover-style-row">
-            <label class="cv-label">文字样式</label>
-            <div class="cover-style-controls">
-              <select id="cover-sub-font" class="select-input cv-font">
-                <option value="Microsoft YaHei">微软雅黑</option>
-                <option value="SimHei">黑体</option>
-                <option value="KaiTi">楷体</option>
-                <option value="SimSun">宋体</option>
-                <option value="FangSong">仿宋</option>
-                <option value="YouYuan">幼圆</option>
-              </select>
-              <label class="cv-sub-label">颜色</label>
-              <input type="color" id="cover-sub-color" class="cv-color" value="#FFD232" title="字体颜色">
-              <label class="cv-sub-label">描边</label>
-              <input type="color" id="cover-sub-stroke" class="cv-color" value="#000000" title="描边颜色">
-              <label class="cv-sub-label">字号</label>
-              <input type="number" id="cover-sub-size" class="cv-size" value="90" min="20" max="200" title="字号">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <label>风格</label>
-          <select id="cover-style" class="select-input" style="width:100px">
-            <option value="dark">暗色</option>
-            <option value="light">亮色</option>
-          </select>
-          <label style="margin-left:12px">截取</label>
-          <input type="number" id="cover-bg-time" class="text-input" style="width:60px" value="2.5" step="0.5" min="0">
-          <span style="font-size:12px;color:var(--text2);margin-left:4px">秒</span>
-        </div>
-        <div class="form-row">
-          <button class="btn-green" id="btn-gen-cover" style="flex:1">生成封面</button>
-          <button class="btn-small" id="btn-pick-cover" style="margin-left:6px">手动选择</button>
-        </div>
+        <button class="btn-green" id="btn-design-cover" style="width:100%">🎨 设计封面</button>
+        <button class="btn-small" id="btn-pick-cover" style="width:100%;margin-top:6px">手动选择图片</button>
         <!-- 平台 tab 切换 -->
         <div class="cover-tabs" id="cover-tabs" style="display:none;margin-top:8px">
           <div class="cover-tab active" data-platform="douyin">抖音</div>
@@ -322,31 +270,240 @@
     <div class="log-body" id="log-body"></div>
   </div>
 
+  <!-- 封面设计弹窗 -->
+  <div class="modal-overlay" id="cover-design-modal" style="display:none">
+    <div class="modal" style="width:900px;max-width:98vw;height:88vh;max-height:88vh">
+      <div class="modal-header">
+        <h2>🎨 封面设计</h2>
+        <button class="close-btn" id="btn-close-cover-modal">✕</button>
+      </div>
+      <div class="modal-body" style="padding:0;flex:1;overflow:hidden;display:flex;flex-direction:row;gap:0">
+
+        <!-- 左栏：背景选择 -->
+        <div style="width:220px;min-width:180px;border-right:1px solid var(--border);padding:14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px">背景来源</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn-small cover-bg-tab active" data-tab="video" style="flex:1">视频截帧</button>
+            <button class="btn-small cover-bg-tab" data-tab="image" style="flex:1">上传图片</button>
+          </div>
+
+          <!-- 视频截帧 -->
+          <div id="cover-bg-video-panel">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">拖动选取时间点</div>
+            <video id="cover-bg-video" style="width:100%;border-radius:6px;background:#000;display:none" muted></video>
+            <div id="cover-bg-timeline" style="position:relative;height:28px;background:var(--bg2);border-radius:4px;margin-top:6px;cursor:pointer;overflow:hidden">
+              <div id="cover-bg-timeline-bar" style="position:absolute;top:0;bottom:0;width:2px;background:#e44;left:0"></div>
+              <canvas id="cover-bg-waveform" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.5"></canvas>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+              <input type="number" id="cover-bg-time-input" value="2.5" min="0" step="0.1" style="width:60px" class="text-input">
+              <span style="font-size:11px;color:var(--text2)">秒</span>
+              <button class="btn-small" id="btn-cover-bg-capture" style="flex:1">截取</button>
+            </div>
+          </div>
+
+          <!-- 上传图片 -->
+          <div id="cover-bg-image-panel" style="display:none">
+            <button class="btn-action" id="btn-cover-bg-pick" style="width:100%">选择图片</button>
+            <div id="cover-bg-image-name" style="font-size:11px;color:var(--text2);margin-top:4px;word-break:break-all"></div>
+          </div>
+
+          <!-- 蒙层透明度 -->
+          <div style="margin-top:4px">
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">蒙层透明度</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="range" id="cover-overlay-opacity" min="0" max="80" value="35" style="flex:1">
+              <span id="cover-overlay-opacity-val" style="font-size:11px;color:var(--text2);width:28px">35%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 中栏：Canvas 预览 -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 10px;gap:10px;overflow:hidden">
+          <div style="font-size:12px;font-weight:600;color:var(--text2)">预览（可拖动文字）</div>
+          <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;width:100%">
+            <canvas id="cover-canvas" width="270" height="480" style="border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.4);cursor:default;max-height:100%"></canvas>
+          </div>
+          <div style="display:flex;gap:8px;width:100%">
+            <button class="btn-action" id="btn-cover-gen-title" style="flex:1">✨ 一键生成标题</button>
+            <button class="btn-green" id="btn-cover-confirm" style="flex:1">生成封面</button>
+          </div>
+        </div>
+
+        <!-- 右栏：文字 + 版式 -->
+        <div style="width:230px;min-width:190px;border-left:1px solid var(--border);padding:14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
+
+          <!-- 版式 -->
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">版式</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button class="cover-layout-btn active" data-layout="minimal">极简<br><span style="font-size:10px;opacity:0.7">1-2字</span></button>
+              <button class="cover-layout-btn" data-layout="four">四字<br><span style="font-size:10px;opacity:0.7">3-4字</span></button>
+              <button class="cover-layout-btn" data-layout="title">标题<br><span style="font-size:10px;opacity:0.7">5-10字</span></button>
+              <button class="cover-layout-btn" data-layout="long">长文<br><span style="font-size:10px;opacity:0.7">10字+</span></button>
+            </div>
+          </div>
+
+          <!-- 主标题 -->
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">主标题</div>
+            <div style="display:flex;gap:4px;margin-bottom:4px">
+              <input type="text" id="cd-main-title" class="text-input" style="flex:1" placeholder="主标题文字">
+              <button class="btn-small" id="btn-cover-ai-title" title="AI生成">AI</button>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+              <select id="cd-main-font" class="select-input" style="flex:1;min-width:80px">
+                <option value="Microsoft YaHei">微软雅黑</option>
+                <option value="SimHei">黑体</option>
+                <option value="KaiTi">楷体</option>
+                <option value="SimSun">宋体</option>
+                <option value="FangSong">仿宋</option>
+                <option value="YouYuan">幼圆</option>
+              </select>
+              <input type="number" id="cd-main-size" value="160" min="40" max="280" style="width:52px" class="text-input" title="字号">
+            </div>
+            <div style="display:flex;gap:4px;margin-top:4px;align-items:center">
+              <label style="font-size:11px;color:var(--text2)">颜色</label>
+              <input type="color" id="cd-main-color" value="#FFFFFF" class="cv-color">
+              <label style="font-size:11px;color:var(--text2)">描边</label>
+              <input type="color" id="cd-main-stroke" value="#000000" class="cv-color">
+            </div>
+          </div>
+
+          <!-- 副标题 -->
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">副标题 <span style="font-weight:400;opacity:0.6">（可选）</span></div>
+            <input type="text" id="cd-sub-title" class="text-input" style="width:100%;margin-bottom:4px" placeholder="副标题文字">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+              <select id="cd-sub-font" class="select-input" style="flex:1;min-width:80px">
+                <option value="Microsoft YaHei">微软雅黑</option>
+                <option value="SimHei">黑体</option>
+                <option value="KaiTi">楷体</option>
+                <option value="SimSun">宋体</option>
+                <option value="FangSong">仿宋</option>
+                <option value="YouYuan">幼圆</option>
+              </select>
+              <input type="number" id="cd-sub-size" value="90" min="20" max="200" style="width:52px" class="text-input" title="字号">
+            </div>
+            <div style="display:flex;gap:4px;margin-top:4px;align-items:center">
+              <label style="font-size:11px;color:var(--text2)">颜色</label>
+              <input type="color" id="cd-sub-color" value="#FFD232" class="cv-color">
+              <label style="font-size:11px;color:var(--text2)">描边</label>
+              <input type="color" id="cd-sub-stroke" value="#000000" class="cv-color">
+            </div>
+          </div>
+
+          <!-- 风格 -->
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">蒙层风格</div>
+            <select id="cd-style" class="select-input" style="width:100%">
+              <option value="dark">暗色</option>
+              <option value="light">亮色</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 画中画片段确认弹窗 -->
   <div class="modal-overlay" id="pip-confirm-modal" style="display:none">
-    <div class="modal" style="width:380px">
+    <div class="modal" style="width:580px">
       <div class="modal-header">
         <h2>确认替换片段</h2>
         <button class="close-btn" id="btn-close-pip-modal">✕</button>
       </div>
-      <div class="modal-body" style="padding:10px 20px">
-        <div style="margin-bottom:8px;font-size:13px;color:var(--text2)">
-          替换片段：<span id="pip-confirm-range" style="color:var(--blue);font-family:monospace"></span>
-          <span id="pip-confirm-dur" style="margin-left:8px;color:var(--green)"></span>
+      <div class="modal-body" style="padding:10px 20px;flex-direction:column;gap:12px">
+        <!-- 顶部：片段信息 -->
+        <div style="font-size:12px;color:var(--text2);display:flex;gap:12px">
+          <span>片段：<span id="pip-confirm-range" style="color:var(--blue);font-family:monospace"></span></span>
+          <span id="pip-confirm-dur" style="color:var(--green)"></span>
         </div>
-        <div style="margin-bottom:8px;font-size:13px;color:var(--text2)">
-          替换视频：<span id="pip-confirm-video" style="word-break:break-all"></span>
+        <!-- 主视频出现/消失时间进度条 -->
+        <div style="font-size:11px;color:var(--text2);margin-bottom:2px">画中画出现时间（拖动选择范围）</div>
+        <div style="position:relative;height:28px;background:var(--bg2);border-radius:4px;border:1px solid var(--border)" id="pip-main-timeline">
+          <div id="pip-main-range" style="position:absolute;top:0;bottom:0;background:rgba(0,113,227,0.35);border-radius:4px"></div>
+          <div id="pip-main-handle-start" style="position:absolute;top:0;bottom:0;width:8px;background:#0071E3;border-radius:3px;cursor:ew-resize;transform:translateX(-50%)"></div>
+          <div id="pip-main-handle-end" style="position:absolute;top:0;bottom:0;width:8px;background:#0071E3;border-radius:3px;cursor:ew-resize;transform:translateX(-50%)"></div>
+          <span id="pip-main-time-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--text2);pointer-events:none;white-space:nowrap"></span>
         </div>
-        <div class="form-row">
-          <label>结束时间</label>
-          <input type="text" id="pip-confirm-end" class="text-input flex1" placeholder="自动">
-          <span style="font-size:11px;color:var(--text2);margin-left:6px">自动: <span id="pip-confirm-end-hint"></span></span>
-        </div>
-        <div class="form-row">
-          <label>覆盖BGM</label>
-          <label class="toggle"><input type="checkbox" id="pip-confirm-cover-bgm"><span class="slider-track"></span></label>
-          <span style="color:var(--text2);font-size:12px;margin-left:8px">播放时静音</span>
-        </div>
+        <div style="display:flex;flex-direction:row;gap:16px;align-items:flex-start">
+          <!-- 左侧信息 -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+            <div style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              文件：<span id="pip-confirm-video"></span>
+            </div>
+            <!-- 隐藏的位置/尺寸/裁剪输入，供 JS 读写 -->
+            <input type="hidden" id="pip-confirm-x" value="0">
+            <input type="hidden" id="pip-confirm-y" value="0">
+            <input type="hidden" id="pip-confirm-w" value="100">
+            <input type="hidden" id="pip-confirm-h" value="100">
+            <input type="hidden" id="pip-lock-ratio">
+            <input type="hidden" id="pip-crop-top" value="0">
+            <input type="hidden" id="pip-crop-bottom" value="0">
+            <input type="hidden" id="pip-crop-left" value="0">
+            <input type="hidden" id="pip-crop-right" value="0">
+            <!-- 素材时间裁剪 -->
+            <div style="font-size:11px;color:var(--text2);margin-top:2px" id="pip-src-time-label-row">素材播放片段（拖动选择）</div>
+            <div style="position:relative;height:28px;background:var(--bg2);border-radius:4px;border:1px solid var(--border)" id="pip-src-timeline">
+              <div id="pip-src-range" style="position:absolute;top:0;bottom:0;background:rgba(0,200,100,0.35);border-radius:4px"></div>
+              <div id="pip-src-handle-start" style="position:absolute;top:0;bottom:0;width:8px;background:#00c864;border-radius:3px;cursor:ew-resize;transform:translateX(-50%)"></div>
+              <div id="pip-src-handle-end" style="position:absolute;top:0;bottom:0;width:8px;background:#00c864;border-radius:3px;cursor:ew-resize;transform:translateX(-50%)"></div>
+              <span id="pip-src-time-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--text2);pointer-events:none;white-space:nowrap">加载中...</span>
+            </div>
+            <!-- 素材时长同步提示 -->
+            <div id="pip-src-dur-row" style="font-size:11px;color:var(--text2);display:none">
+              素材时长：<span id="pip-src-dur-display" style="color:#00c864;font-family:monospace"></span>
+              <span style="margin-left:6px;color:var(--text2)">→ 已同步到出现时间</span>
+            </div>
+            <div class="form-row">
+              <label style="min-width:44px">静音</label>
+              <label class="toggle"><input type="checkbox" id="pip-confirm-cover-bgm"><span class="slider-track"></span></label>
+              <span style="color:var(--text2);font-size:12px;margin-left:8px">播放时静音</span>
+            </div>
+          </div>
+          <!-- 中间：素材视频预览（仅视频素材显示） -->
+          <div id="pip-src-video-wrap" style="display:none;flex-shrink:0;flex-direction:column;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--text2)">素材预览</span>
+            <video id="pip-src-video" style="width:100px;height:178px;background:#111;border-radius:6px;border:1px solid var(--border);object-fit:contain" muted></video>
+            <div id="pip-src-video-time" style="font-size:10px;color:var(--text2);font-family:monospace;text-align:center"></div>
+            <div style="display:flex;gap:4px">
+              <button id="pip-src-play-btn" style="background:#333;color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;flex-shrink:0">▶</button>
+              <span id="pip-src-time-display" style="font-size:10px;color:var(--text2);font-family:monospace;flex:1;text-align:center;line-height:24px">0:00</span>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button id="pip-src-set-start" style="flex:1;background:#1a3a1a;color:#00c864;border:1px solid #00c864;border-radius:4px;padding:3px 0;font-size:10px;cursor:pointer">设为开始</button>
+              <button id="pip-src-set-end" style="flex:1;background:#1a3a1a;color:#00c864;border:1px solid #00c864;border-radius:4px;padding:3px 0;font-size:10px;cursor:pointer">设为结束</button>
+            </div>
+            <div id="pip-src-progress-bar" style="position:relative;height:16px;background:#333;border-radius:3px;cursor:pointer;overflow:hidden;width:100px">
+              <div id="pip-src-progress-range" style="position:absolute;top:0;bottom:0;background:rgba(0,200,100,0.4);pointer-events:none"></div>
+              <div id="pip-src-progress-fill" style="position:absolute;top:0;bottom:0;left:0;width:0%;background:#00c864;pointer-events:none"></div>
+            </div>
+          </div>
+          <!-- 右侧预览画布 -->
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--text2)">拖拽调整位置/大小，边线裁剪画面</span>
+            <div id="pip-pos-canvas" style="position:relative;width:148px;height:263px;background:#111;border-radius:6px;border:1px solid var(--border);flex-shrink:0">
+              <div style="position:absolute;inset:0;overflow:hidden;border-radius:6px">
+              <div id="pip-pos-el" style="position:absolute;left:0;top:0;width:100%;height:100%;cursor:move;box-sizing:border-box;border:2px solid #0071E3;overflow:hidden">
+                <img id="pip-pos-img" style="width:100%;height:100%;object-fit:cover;display:none;pointer-events:none" draggable="false">
+                <video id="pip-pos-video" style="width:100%;height:100%;object-fit:cover;display:none;pointer-events:none" muted></video>
+                <!-- 裁剪遮罩四边 -->
+                <div id="pip-crop-overlay-top"    style="position:absolute;left:0;right:0;top:0;background:rgba(0,0,0,0.5);pointer-events:none;z-index:3"></div>
+                <div id="pip-crop-overlay-bottom" style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);pointer-events:none;z-index:3"></div>
+                <div id="pip-crop-overlay-left"   style="position:absolute;top:0;bottom:0;left:0;background:rgba(0,0,0,0.5);pointer-events:none;z-index:3"></div>
+                <div id="pip-crop-overlay-right"  style="position:absolute;top:0;bottom:0;right:0;background:rgba(0,0,0,0.5);pointer-events:none;z-index:3"></div>
+                <!-- 裁剪拖拽手柄（pointer-events:none，不拦截 el 的 mousedown） -->
+                <div id="pip-crop-handle-top"    style="position:absolute;left:10%;right:10%;top:0;height:6px;background:#fff;opacity:0.7;cursor:n-resize;z-index:4;border-radius:0 0 3px 3px;pointer-events:none"></div>
+                <div id="pip-crop-handle-bottom" style="position:absolute;left:10%;right:10%;bottom:0;height:6px;background:#fff;opacity:0.7;cursor:s-resize;z-index:4;border-radius:3px 3px 0 0;pointer-events:none"></div>
+                <div id="pip-crop-handle-left"   style="position:absolute;top:10%;bottom:10%;left:0;width:6px;background:#fff;opacity:0.7;cursor:w-resize;z-index:4;border-radius:0 3px 3px 0;pointer-events:none"></div>
+                <div id="pip-crop-handle-right"  style="position:absolute;top:10%;bottom:10%;right:0;width:6px;background:#fff;opacity:0.7;cursor:e-resize;z-index:4;border-radius:3px 0 0 3px;pointer-events:none"></div>
+              </div>
+              </div>
+              <!-- resize 手柄放在 canvas 层，不受 el 的 overflow:hidden 影响 -->
+              <div id="pip-pos-resize" style="position:absolute;width:14px;height:14px;background:#0071E3;cursor:se-resize;border-radius:2px 0 0 0;z-index:10"></div>
+            </div>
+          </div>
       </div>
       <div class="modal-footer">
         <button class="btn-small" id="btn-cancel-pip-modal">取消</button>
@@ -388,6 +545,24 @@
       </div>
       <div class="modal-footer">
         <button class="btn-green" id="btn-save-settings">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示词编辑弹窗 -->
+  <div class="modal-overlay" id="prompt-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>✏ 改写提示词</h2>
+        <button class="close-btn" id="btn-close-prompt">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px">用 <code>{raw}</code> 表示原始文案的插入位置。留空则使用内置默认提示词。</div>
+        <textarea id="prompt-textarea" style="width:100%;height:320px;font-size:13px;font-family:monospace;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:6px;padding:10px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:8px">
+        <button class="btn-action" id="btn-reset-prompt" style="flex:0 0 auto;background:var(--bg3)">恢复默认</button>
+        <button class="btn-green" id="btn-save-prompt" style="flex:1">保存</button>
       </div>
     </div>
   </div>

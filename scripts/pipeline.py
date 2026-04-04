@@ -7,6 +7,11 @@ import argparse
 import sys
 import os
 
+# 强制 stdout/stderr 使用 UTF-8，避免 Windows GBK 编码错误
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 # 确保 scripts 目录在 path 中
 sys.path.insert(0, os.path.dirname(__file__))
 

@@ -4,6 +4,8 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const os = require('os')
 
+let win = null
+
 process.on('uncaughtException', (err) => {
   const msg = err.stack || err.message
   try {
@@ -74,7 +76,7 @@ function saveConfig(cfg) {
 }
 
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1100,
     height: 720,
     minWidth: 900,
@@ -234,7 +236,8 @@ ipcMain.handle('step:run', (event, { step, sessionPath }) => {
     VF_HEYGEN_KEY: cfg.heygenApiKey,
     VF_HEYGEN_AVATAR: cfg.heygenAvatarId,
     HTTP_PROXY: cfg.proxy || process.env.HTTP_PROXY || '',
-    HTTPS_PROXY: cfg.proxy || process.env.HTTPS_PROXY || ''
+    HTTPS_PROXY: cfg.proxy || process.env.HTTPS_PROXY || '',
+    VF_REWRITE_PROMPT: cfg.rewritePrompt || ''
   }
 
   const proc = spawn(python, [script, '--step', step, '--session', sessionPath], { env })
@@ -298,6 +301,21 @@ ipcMain.handle('shell:showItemInFolder', (_, p) => shell.showItemInFolder(p))
 
 // 文件选择对话框
 ipcMain.handle('dialog:openFile', async (_, opts) => {
-  const result = await dialog.showOpenDialog({ properties: ['openFile'], ...opts })
+  const result = await dialog.showOpenDialog(win, { properties: ['openFile'], ...opts })
   return result.canceled ? null : result.filePaths[0]
+})
+
+// BGM 预设列表
+ipcMain.handle('bgm:list', () => {
+  const dir = path.join(__dirname, '背景音乐')
+  try {
+    return fs.readdirSync(dir)
+      .filter(f => /\.(mp3|wav|m4a|aac)$/i.test(f))
+      .map(f => ({ name: f.replace(/\.[^.]+$/, ''), path: path.join(dir, f) }))
+  } catch { return [] }
+})
+
+// 读取文本文件
+ipcMain.handle('fs:readText', (_, filePath) => {
+  try { return fs.readFileSync(filePath, 'utf8') } catch { return null }
 })

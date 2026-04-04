@@ -1,0 +1,9 @@
+faster-whisper
+rookiepy
+anthropic
+Pillow
+requests
+aiohttp
+pyyaml
+aiofiles
+gmssl

@@ -42,17 +42,17 @@ def safe_path(path_str: str, session_dir: str) -> str:
     """
     如果路径含非ASCII字符（中文等），复制到 session_dir 下并返回新路径。
     否则直接返回原路径。这样 ffmpeg 命令行不会乱码。
-    每次都复制并覆盖，避免不同文件使用相同缓存名。
+    用源文件路径的哈希作为文件名，确保不同文件不会互相覆盖。
     """
     try:
         path_str.encode('ascii')
         return path_str
     except UnicodeEncodeError:
         pass
+    import hashlib, shutil
     ext = os.path.splitext(path_str)[1]
-    ascii_name = f"_tmp_input{ext}"
+    h = hashlib.md5(path_str.encode('utf-8')).hexdigest()[:8]
+    ascii_name = f"_tmp_{h}{ext}"
     dest = os.path.join(session_dir, ascii_name)
-    # 每次都复制并覆盖，确保使用最新的文件
-    import shutil
     shutil.copy2(path_str, dest)
     return dest

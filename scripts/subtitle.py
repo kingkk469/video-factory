@@ -21,6 +21,9 @@ def run(session_path: str):
     session = read_session(session_path)
     audio_path = session.get("audio", {}).get("audio_path", "")
     if not audio_path or not os.path.exists(audio_path):
+        # 降级：用视频文件作为音频源
+        audio_path = session.get("video", {}).get("video_path", "")
+    if not audio_path or not os.path.exists(audio_path):
         error("未找到配音文件，请先完成配音步骤")
 
     rewrite_text = session.get("rewrite", {}).get("rewritten", "")
@@ -87,17 +90,17 @@ def run(session_path: str):
     for si, sent in enumerate(sentences_clean):
         sent_chars = list(sent)
         sent_len = len(sent_chars)
-        if sent_len == 0 or pos >= n_chars:
+        if sent_len == 0:
             char_sent[si] = (pos, pos)
             continue
 
         # 在 asr_chars[pos:] 中找最佳匹配起点
-        best_i = pos
+        best_i = min(pos, max(0, n_chars - 1))
         best_score = -1
 
-        # 搜索范围：当前位置前后各50个字符
-        search_start = max(0, pos - 30)
-        search_end = min(n_chars, pos + sent_len + 30)
+        # 搜索范围：从当前位置向后最多 sent_len*4+150 个字符
+        search_start = max(0, pos - 10)
+        search_end = min(n_chars, pos + sent_len * 4 + 150)
 
         for start_i in range(search_start, search_end):
             if start_i + sent_len > n_chars:
@@ -110,48 +113,74 @@ def run(session_path: str):
                 best_score = score
                 best_i = start_i
 
+        # 如果完全没有匹配，按比例估算位置（避免后续句子全部跳过）
+        if best_score == 0:
+            best_i = min(pos, n_chars - sent_len) if n_chars > sent_len else 0
+
         char_sent[si] = (best_i, best_i + sent_len)
         pos = best_i + sent_len
 
     # 4. 将字符索引映射回词级时间戳
+    # 先把所有句子分成"ASR内匹配"和"溢出"两组
+    # 构建 char_idx -> 时间 的映射（每个字符对应的词时间）
+    char_to_time = []  # list of (start_s, end_s) per char position
+    char_idx = 0
+    for (w_text, w_s, w_e) in words:
+        for _ in w_text:
+            char_to_time.append((w_s, w_e))
+        char_idx += len(w_text)
+    # 补齐（防止 ce 超出）
+    if char_to_time:
+        while len(char_to_time) < n_chars:
+            char_to_time.append(char_to_time[-1])
+
     srt_lines = []
     idx = 1
     prev_end_ms = 0
+    last_valid_end_s = 0.0  # 最后一个有效 ASR 匹配的结束时间
 
+    # 先处理 ASR 范围内的句子，记录最后有效时间
+    entries = []  # list of (si, start_s, end_s, is_overflow)
     for si, (sent, (cs, ce)) in enumerate(zip(sentences, char_sent)):
-        if cs >= n_chars or cs >= ce:
+        if cs >= ce:
+            entries.append((si, None, None, True))
             continue
+        cs_clamped = min(cs, len(char_to_time) - 1)
+        ce_clamped = min(ce - 1, len(char_to_time) - 1)
+        # 判断是否溢出（原始 cs 超过 ASR 文本长度）
+        is_overflow = (cs >= n_chars)
+        start_s = char_to_time[cs_clamped][0]
+        end_s = char_to_time[ce_clamped][1]
+        if not is_overflow:
+            last_valid_end_s = end_s
+        entries.append((si, start_s, end_s, is_overflow))
 
-        # 找到包含 cs 和 ce-1 的词索引
-        char_idx = 0
-        word_start = None
-        word_end = None
-        for wi, (w_text, w_s, w_e) in enumerate(words):
-            w_len = len(w_text)
-            if char_idx <= cs < char_idx + w_len and word_start is None:
-                word_start = (wi, w_s)
-            if char_idx <= ce - 1 < char_idx + w_len:
-                word_end = (wi, w_e)
-            char_idx += w_len
-            if char_idx > ce - 1 and word_end is None:
-                word_end = (wi, w_e)
-                break
+    # 找出溢出句子的数量，均匀分配剩余时间
+    overflow_indices = [i for i, (si, s, e, ov) in enumerate(entries) if ov or s is None]
+    if overflow_indices and total_duration > last_valid_end_s:
+        remaining = total_duration - last_valid_end_s
+        slot = remaining / len(overflow_indices)
+        for k, ei in enumerate(overflow_indices):
+            si = entries[ei][0]
+            start_s = last_valid_end_s + k * slot
+            end_s = last_valid_end_s + (k + 1) * slot
+            entries[ei] = (si, start_s, end_s, True)
 
-        if word_start is None:
-            word_start = (0, 0)
-        if word_end is None:
-            word_end = (len(words) - 1, words[-1][2] if words else 0)
-
-        start_s = word_start[1]
-        end_s = word_end[1]
-
-        # 填补小间隙（小于 0.3 秒则重叠）
-        if prev_end_ms > 0 and start_s * 1000 - prev_end_ms < 0:
+    for (si, start_s, end_s, is_overflow) in entries:
+        if start_s is None:
+            continue
+        # 修正时间顺序
+        if start_s >= end_s:
+            end_s = start_s + 1.5
+        # 填补小间隙
+        if prev_end_ms > 0 and int(start_s * 1000) < prev_end_ms:
             start_s = prev_end_ms / 1000
+        if start_s >= end_s:
+            end_s = start_s + 0.5
 
         srt_lines.append(str(idx))
         srt_lines.append(f"{ms_to_srt(int(start_s * 1000))} --> {ms_to_srt(int(end_s * 1000))}")
-        srt_lines.append(sentences[si])  # 用原始带标点的句子
+        srt_lines.append(sentences[si])
         srt_lines.append("")
 
         prev_end_ms = int(end_s * 1000)

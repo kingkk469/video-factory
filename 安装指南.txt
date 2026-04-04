@@ -1,0 +1,53 @@
+============================================================
+  Video Factory - 安装指南
+============================================================
+
+使用本软件前，请按以下步骤完成环境配置。
+
+
+【第一步】安装 Python
+
+1. 打开浏览器，访问华为云镜像（国内速度快）：
+   https://mirrors.huaweicloud.com/python/3.12.9/
+2. 点击下载 "python-3.12.9-amd64.exe"
+3. 运行安装包，勾选 "Add Python to PATH"，再点 Install Now
+4. 安装完成后，打开命令提示符（Win+R，输入 cmd，回车）
+5. 输入以下命令验证安装成功：
+   python --version
+
+
+【第二步】安装依赖包
+
+在命令提示符中，复制粘贴以下命令并回车：
+
+pip install faster-whisper anthropic Pillow requests aiohttp pyyaml aiofiles cryptography -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+安装过程需要几分钟，请耐心等待。
+
+
+【第三步】运行软件
+
+双击 "Video Factory-1.0.1.exe" 即可启动。
+
+首次运行时，软件会自动检测并安装缺失的依赖包。
+如遇到安装失败，请手动执行第二步的命令。
+
+
+============================================================
+  常见问题
+============================================================
+
+Q: 提示 "python 不是内部或外部命令"
+A: 重新安装 Python，安装时务必勾选 "Add Python to PATH"
+
+Q: pip 安装速度很慢
+A: 命令中已包含清华镜像源，如仍较慢，请检查网络连接
+
+Q: 提示无法获取抖音 cookies
+A: 请先用 Chrome 或 Edge 浏览器登录 douyin.com，再运行软件
+
+Q: faster-whisper 安装失败
+A: 请先安装 Microsoft C++ Build Tools：
+   https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
+============================================================

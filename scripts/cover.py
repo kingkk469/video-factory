@@ -115,14 +115,13 @@ def hex_to_rgba(hex_color, alpha=255):
 
 
 def generate_cover(bg_frame, platform, main_title, sub_title="",
-                   style="dark",
+                   style="dark", overlay_opacity=35,
                    main_font=None, main_color=None, main_size=None, main_stroke_color=None,
-                   sub_font=None, sub_color=None, sub_size=None, sub_stroke_color=None):
+                   sub_font=None, sub_color=None, sub_size=None, sub_stroke_color=None,
+                   main_pos=None, sub_pos=None):
     """
     生成单个平台的封面图
-    布局：
-      - 主标题：居中偏上，超大字号，粗描边，单行
-      - 副标题：单行，尾字对齐主标题尾字
+    main_pos/sub_pos: {"x": 50, "y": 35} 百分比坐标（相对于画布）
     """
     w, h = PLATFORM_SIZES[platform]
 
@@ -130,29 +129,9 @@ def generate_cover(bg_frame, platform, main_title, sub_title="",
     bg = crop_center(bg_frame.copy(), w, h).filter(ImageFilter.GaussianBlur(2))
     bg = bg.convert("RGBA")
 
-    # ── 轻度暗化（只加薄薄一层，不遮挡背景） ──
-    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    ov_draw = ImageDraw.Draw(overlay)
-    if style == "dark":
-        for y_pos in range(h):
-            r = y_pos / h
-            if r < 0.08:
-                a = int(60 + 80 * (r / 0.08))
-            elif r < 0.45:
-                a = 140
-            elif r < 0.55:
-                a = int(140 - 60 * ((r - 0.45) / 0.1))
-            elif r < 0.82:
-                a = 80
-            else:
-                a = int(80 + 80 * ((r - 0.82) / 0.18))
-            ov_draw.line([(0, y_pos), (w, y_pos)], fill=(0, 0, 0, a))
-    else:
-        for y_pos in range(h):
-            r = y_pos / h
-            a = 100 if r < 0.45 or r > 0.82 else 50
-            ov_draw.line([(0, y_pos), (w, y_pos)], fill=(255, 255, 255, a))
-
+    # ── 蒙层 ──
+    ov = overlay_opacity / 100.0
+    overlay = Image.new("RGBA", (w, h), (*((0, 0, 0) if style == "dark" else (255, 255, 255)), int(ov * 255)))
     bg = Image.alpha_composite(bg, overlay)
     draw = ImageDraw.Draw(bg)
 
@@ -183,28 +162,33 @@ def generate_cover(bg_frame, platform, main_title, sub_title="",
 
     font_main = find_font(main_size_px, bold=True, font_name=main_font)
 
-    # 单行绘制
     tw, th = measure_text(draw, main_title, font_main)
-    x_main = cx - tw // 2
-    start_y = int(h * 0.12)
+    if main_pos:
+        x_main = int(w * main_pos["x"] / 100) - tw // 2
+        start_y = int(h * main_pos["y"] / 100) - th // 2
+    else:
+        x_main = cx - tw // 2
+        start_y = int(h * 0.12)
 
     draw_stroked_text(draw, x_main, start_y, main_title, font_main, main_fill,
                       stroke_fill=main_stroke, stroke_width=7)
 
-    # 记录主标题右边界（用于副标题对齐）
     main_title_right_x = x_main + tw
     main_bottom = start_y + th
 
-    # ── 副标题（单行，尾字对齐主标题尾字） ──
+    # ── 副标题 ──
     if sub_title:
         sub_size_px = sub_size if sub_size else max(56, int(main_size_px * 0.6))
         font_sub = find_font(sub_size_px, bold=True, font_name=sub_font)
 
         sub_tw, sub_th = measure_text(draw, sub_title, font_sub)
-        sub_start_y = main_bottom + int(main_size_px * 0.35)
+        if sub_pos:
+            sub_x = int(w * sub_pos["x"] / 100) - sub_tw // 2
+            sub_start_y = int(h * sub_pos["y"] / 100) - sub_th // 2
+        else:
+            sub_start_y = main_bottom + int(main_size_px * 0.35)
+            sub_x = main_title_right_x - sub_tw
 
-        # 右对齐
-        sub_x = main_title_right_x - sub_tw
         draw_stroked_text(draw, sub_x, sub_start_y, sub_title, font_sub, sub_fill,
                           stroke_fill=sub_stroke, stroke_width=5)
 
@@ -225,6 +209,10 @@ def run(session_path: str):
     sub_title = design.get("subTitle", "")
     style = design.get("style", "dark")
     bg_timestamp = design.get("bgFrame", 2.5)
+    bg_image = design.get("bgImage", None)
+    overlay_opacity = design.get("overlayOpacity", 35)
+    main_pos = design.get("mainPos", None)
+    sub_pos  = design.get("subPos", None)
     # 主标题样式
     main_font   = design.get("mainFont", None) or None
     main_color  = design.get("mainColor", None) or None
@@ -250,12 +238,16 @@ def run(session_path: str):
         done("cover_path", out_path)
         return
 
-    log(f"从视频 {bg_timestamp}s 处截取背景帧...")
+    # 背景帧：优先用用户上传图片，否则从视频截帧
     tmp_frame = os.path.join(session_dir, "_tmp_bg_frame.jpg")
-    if not extract_frame(video_path, bg_timestamp, tmp_frame):
-        error("背景帧截取失败")
-
-    bg_frame = Image.open(tmp_frame)
+    if bg_image and os.path.exists(bg_image):
+        log(f"使用用户上传背景图: {bg_image}")
+        bg_frame = Image.open(bg_image)
+    else:
+        log(f"从视频 {bg_timestamp}s 处截取背景帧...")
+        if not extract_frame(video_path, bg_timestamp, tmp_frame):
+            error("背景帧截取失败")
+        bg_frame = Image.open(tmp_frame)
 
     cover_data = {
         "status": "done",
@@ -278,8 +270,10 @@ def run(session_path: str):
     for platform in PLATFORM_SIZES:
         log(f"生成 {platform} 封面 ({PLATFORM_SIZES[platform][0]}x{PLATFORM_SIZES[platform][1]})...")
         cover = generate_cover(bg_frame, platform, main_title, sub_title, style,
+                               overlay_opacity=overlay_opacity,
                                main_font=main_font, main_color=main_color, main_size=main_size, main_stroke_color=main_stroke,
-                               sub_font=sub_font, sub_color=sub_color, sub_size=sub_size, sub_stroke_color=sub_stroke)
+                               sub_font=sub_font, sub_color=sub_color, sub_size=sub_size, sub_stroke_color=sub_stroke,
+                               main_pos=main_pos, sub_pos=sub_pos)
         out_path = os.path.join(session_dir, f"cover_{platform}.jpg")
         cover.save(out_path, "JPEG", quality=95)
         cover_data[platform] = out_path

@@ -34,5 +34,11 @@ contextBridge.exposeInMainWorld('api', {
   openFile: (opts) => ipcRenderer.invoke('dialog:openFile', opts),
 
   // 环境检测
-  envCheck: () => ipcRenderer.invoke('env:check')
+  envCheck: () => ipcRenderer.invoke('env:check'),
+
+  // BGM 预设
+  bgmList: () => ipcRenderer.invoke('bgm:list'),
+
+  // 读取文本文件
+  readFile: (p) => ipcRenderer.invoke('fs:readText', p)
 })
